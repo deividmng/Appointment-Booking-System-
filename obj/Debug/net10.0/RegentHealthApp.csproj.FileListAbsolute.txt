@@ -1,0 +1,14 @@
+C:\Users\manga\Desktop\Regent\RegentHealth\bin\Debug\net10.0\RegentHealthApp.exe
+C:\Users\manga\Desktop\Regent\RegentHealth\bin\Debug\net10.0\RegentHealthApp.deps.json
+C:\Users\manga\Desktop\Regent\RegentHealth\bin\Debug\net10.0\RegentHealthApp.runtimeconfig.json
+C:\Users\manga\Desktop\Regent\RegentHealth\bin\Debug\net10.0\RegentHealthApp.dll
+C:\Users\manga\Desktop\Regent\RegentHealth\bin\Debug\net10.0\RegentHealthApp.pdb
+C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\RegentHealthApp.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\RegentHealthApp.AssemblyInfoInputs.cache
+C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\RegentHealthApp.AssemblyInfo.cs
+C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\RegentHealthApp.csproj.CoreCompileInputs.cache
+C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\RegentHealthApp.dll
+C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\refint\RegentHealthApp.dll
+C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\RegentHealthApp.pdb
+C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\RegentHealthApp.genruntimeconfig.cache
+C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\ref\RegentHealthApp.dll
