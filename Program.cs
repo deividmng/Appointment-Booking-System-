@@ -57,13 +57,12 @@ namespace RegentHealthBookingSystem
             {
                 // Display the user interface menu to show the  diferents option 
                 Console.WriteLine("\n--- Regent Health Menu ---");
-                Console.WriteLine("1. Enter Patient Details");
-                Console.WriteLine("2. Book Appointment");
-                Console.WriteLine("3. View Booking Summary");
-                Console.WriteLine("4. View Highest & Lowest Cost");
-                Console.WriteLine("5. View Activity Log");
-                Console.WriteLine("6. Clear Booking");
-                Console.WriteLine("7. Logout");
+                Console.WriteLine("1. Enter Patient Details & Book");
+                Console.WriteLine("2. View Booking Summary");
+                Console.WriteLine("3. View Highest & Lowest Cost");
+                Console.WriteLine("4. View Activity Log");
+                Console.WriteLine("5. Clear Booking");
+                Console.WriteLine("6. Logout");
                 Console.Write("Select option: ");
 
                 // Switch statement to handle the user's menu choice is better to use switch as we have many optios 
@@ -72,48 +71,55 @@ namespace RegentHealthBookingSystem
                     case "1":
                         // 1. Pedimos el nombre al usuario
                         Console.Write("Enter full name: ");
-                        string name = Console.ReadLine();
+                        string inputName = Console.ReadLine() ?? "";
 
-                        // 2. Usamos tu validación (¡esto es muy bueno!)
-                        if (string.IsNullOrWhiteSpace(name) || !IsValidName(name))
+                        // --- TRANSFORMACIÓN DE DATOS ---
+                        // 1. ToLower(): Convierte "JUAN" o "Juan" en "juan".
+                        // 2. Replace(" ", ""): Busca todos los espacios en blanco y los elimina por completo.
+                        // 3. Trim(): Elimina espacios accidentales al inicio o al final.
+                        string cleanedName = inputName.ToLower().Replace(" ", "").Trim();
+
+                        // Usamos la validación con el nombre ya transformado
+                        if (string.IsNullOrWhiteSpace(cleanedName) || !IsValidName(cleanedName))
                         {
                             Console.WriteLine("Invalid name. Please use letters only.");
                             break;
                         }
 
-                        // 3. LA LLAMADA CLAVE: Enviamos el nombre al método del sistema
-                        // Esto conecta tu menú con la lógica que guarda al paciente.
-                        system.CreatePatient(name);
+                        // Guardamos al paciente con el nombre limpio (ej: "juanperez")
+                        system.CreatePatient(cleanedName);
+                        Console.WriteLine($"Patient registered successfully as: {cleanedName}");
 
-                        Console.WriteLine("Patient created successfully.");
-                        break;
-                    case "2":
-                        // Placeholder for booking logic
+                        // PASO 2: ENCADENAMIENTO
+                        Console.WriteLine("\n--- Proceeding to Appointment Booking ---");
                         system.BookAppointment();
+
                         break;
 
-                    case "3":
+
+
+                    case "2":
                         // Placeholder to display the current booking summary
                         system.ViewSummary();
                         break;
 
-                    case "4":
+                    case "3":
                         // Placeholder to display statistics on booking costs
                         system.ShowHighestLowest();
                         break;
 
-                    case "5":
+                    case "4":
                         // Placeholder to display the last 3 user actions
                         system.ShowActivityLog();
                         break;
 
-                    case "6":
+                    case "5":
                         // Resets the current booking data
-                        // system.ClearBooking();
+                        system.ClearBooking();
                         Console.WriteLine("Booking cleared.");
                         break;
 
-                    case "7":
+                    case "6":
                         // Termination logic:" exit the loop" close close menu
                         Console.WriteLine("Logged out.");
                         running = false;

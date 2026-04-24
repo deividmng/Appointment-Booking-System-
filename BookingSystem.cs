@@ -5,23 +5,62 @@ namespace RegentHealthBookingSystem
 {
     class BookingSystem
 
-    
+
     {
-        
-        // Fields required for the method to function
+
+        // This variable holds the specific appointment currently being processed.
+        // The '?' means it can be null if no appointment has been created yet.
         private Appointment? currentAppointment;
-        private List<Appointment> allAppointments = new List<Appointment>();
-        private List<string> activityLog = new List<string>();
+
+        // Fields required for the method to function
+        // --- DATA STORAGE & STATE MANAGEMENT ---
+
+        /// <summary>
+        /// This List acts as the central database of the system.
+        /// It stores every Patient object created during the current session.
+        /// Unlike a fixed array, a List can grow dynamically as more patients are registered.
+        /// </summary>
+        private List<Patient> allPatients = new List<Patient>();
+
+        /// <summary>
+        /// A reference variable (Pointer) that tracks the "Active User" in the session.
+        /// It is marked as nullable (?) because at the start of the program, 
+        /// no patient is selected (it is null).
+        /// </summary>
         private Patient? currentPatient;
+
+        /// <summary>
+        /// A collection that stores all successful bookings.
+        /// It enables the system to generate reports or count the total number of appointments.
+        /// </summary>
+        private List<Appointment> allAppointments = new List<Appointment>();
+
+        /// <summary>
+        /// A dynamic string collection that records every significant system event.
+        /// It provides transparency and allows the user to see a chronological history 
+        /// of their actions (Audit Trail).
+        /// </summary>
+        private List<string> activityLog = new List<string>();
         public void CreatePatient(string name)
         {
-            // Ahora C# sabe qué es currentPatient
-            currentPatient = new Patient(name); 
-            AddActivity("Created patient: " + name);
+            // Clean the name: remove spaces and convert to lowercase
+            string cleanName = name.Replace(" ", "").ToLower();
+
+            // 1. Create the instance with cleaned name
+            Patient newPatient = new Patient(cleanName);
+
+            // 2. Archive it in the global list (Database)
+            allPatients.Add(newPatient);
+
+            // 3. Set as the active patient for immediate booking
+            currentPatient = newPatient;
+
+            // 4. Record the history
+            AddActivity("Registered and selected patient: " + cleanName);
         }
 
 
-        
+
 
         /// <summary>
         /// Handles the process of booking a medical appointment.
@@ -29,7 +68,7 @@ namespace RegentHealthBookingSystem
         /// </summary>
         public void BookAppointment()
         {
-            
+
             // --- 1. DISPLAY SERVICE MENU ---
             // Presents the available options and their costs to the user.
             Console.WriteLine("1. General Consultation (£35)");
@@ -83,7 +122,7 @@ namespace RegentHealthBookingSystem
 
             // --- 5. INSTANTIATION AND RECORDING ---
             // Creates a new Appointment object and adds it to the global list for reporting.
-            currentAppointment = new Appointment(type, date, time, price);
+            currentAppointment = new Appointment(type, date, time, price, currentPatient?.FullName, currentPatient?.Email);
             allAppointments.Add(currentAppointment);
 
             // Updates the activity log to track system usage.
@@ -103,141 +142,179 @@ namespace RegentHealthBookingSystem
         /// </summary>
         public void ViewSummary()
         {
-            // --- 1. NULL REFERENCE PROTECTION ---
-            // Before accessing properties, we check if 'currentAppointment' exists in memory.
-            // This prevents a 'NullReferenceException', which would crash the program 
-            // if the user selects Option 3 before booking a service.
-            if (currentAppointment == null)
+            // 1. VALIDATION: Check if the list is empty
+            if (allAppointments.Count == 0)
             {
-                Console.WriteLine("No booking record found. Please complete Case 2 first.");
+                Console.WriteLine("No booking records found.");
+                AddActivity("Checked summary (Empty)");
                 return;
             }
 
-            // --- 2. DATA RETRIEVAL AND OUTPUT ---
-            // The following lines use string concatenation to display object properties:
+            Console.WriteLine("\n========== BOOKING SUMMARY ==========");
 
-            // Accesses the string 'appointmentType' defined during the booking process.
-            Console.WriteLine("\nAppointment: " + currentAppointment.AppointmentType);
+            // 2. ITERATION: Loop through every appointment in the list
+            int count = 1;
+            foreach (var appointment in allAppointments)
+            {
+                Console.WriteLine($"\n--- Booking #{count} ---");
+                Console.WriteLine("Patient: " + (appointment.PatientName ?? "N/A"));
+                Console.WriteLine("Email: " + (appointment.PatientEmail ?? "N/A"));
+                Console.WriteLine("Service: " + appointment.AppointmentType);
+                Console.WriteLine("Date: " + appointment.AppointmentDate.ToShortDateString());
+                Console.WriteLine("Time: " + appointment.AppointmentTime);
+                Console.WriteLine("Price: £" + appointment.Price);
+                Console.WriteLine("Category: " + appointment.Classification);
+                count++;
+            }
 
-            // .ToShortDateString() is used to format the DateTime object into a clean 
-            // DD/MM/YYYY format, hiding the unnecessary time components (00:00:00).
-            Console.WriteLine("Date: " + currentAppointment.AppointmentDate.ToShortDateString());
+            Console.WriteLine("\n======================================");
 
-            // Displays the raw string value stored for the appointment time.
-            Console.WriteLine("Time: " + currentAppointment.AppointmentTime);
-
-            // Displays the cost with the British Pound currency symbol.
-            Console.WriteLine("Price: £" + currentAppointment.Price);
-
-            // CRITICAL LOGIC DISPLAY: Shows the result of the 'Classify_appointment' call 
-            // made inside the Appointment constructor (e.g., Low Cost, Standard, or Premium).
-            Console.WriteLine("Classification: " + currentAppointment.Classification);
-
-            // --- 3. SYSTEM TRACEABILITY ---
-            // Calls the internal logging method to record that the user accessed this report.
-            AddActivity("Viewed summary");
+            // 3. LOGGING
+            AddActivity("Viewed booking summary");
         }
 
 
-
-        //?----Case 4 ----
+        //?----Case 3 ----
 
         /// <summary>
         /// CASE 4: STATISTICS REPORT
-        /// Analyzes all booked appointments to identify the most and least expensive services.
-        /// This method uses a linear search algorithm to compare costs.
+        /// Displays all appointments sorted from highest to lowest cost.
         /// </summary>
         public void ShowHighestLowest()
         {
             // --- 1. COLLECTION VALIDATION ---
-            // Checks if the list is empty to avoid errors when trying to access index [0].
             if (allAppointments.Count == 0)
             {
                 Console.WriteLine("No data available. Please book appointments first.");
                 return;
             }
 
-            // --- 2. ALGORITHM INITIALIZATION ---
-            // We assume the first appointment in the list is both the highest and lowest 
-            // to start the comparison.
-            Appointment high = allAppointments[0];
-            Appointment low = allAppointments[0];
+            // --- 2. SORT BY PRICE (DESCENDING) ---
+            // Create a sorted copy to not modify original order
+            var sorted = new List<Appointment>(allAppointments);
+            sorted.Sort((a, b) => b.Price.CompareTo(a.Price));
 
-            // --- 3. LINEAR SEARCH LOGIC (Iteration) ---
-            // The foreach loop traverses the entire collection of appointments.
-            foreach (var a in allAppointments)
+            // --- 3. OUTPUT: DISPLAY ALL SORTED ---
+            Console.WriteLine("\n========== PRICE STATISTICS ==========");
+            Console.WriteLine("\nAll Appointments (Highest to Lowest):");
+            Console.WriteLine("----------------------------------------");
+
+            foreach (var a in sorted)
             {
-                // Condition to find the maximum value
-                if (a.Price > high.Price)
-                {
-                    high = a; // Updates the high variable if a more expensive price is found
-                }
+                Console.WriteLine($"£{a.Price} - {a.AppointmentType} ({a.PatientName})");
+            }
 
-                // Condition to find the minimum value
-                if (a.Price < low.Price)
+            Console.WriteLine("----------------------------------------");
+            Console.WriteLine($"Highest Cost: £{sorted[0].Price} - {sorted[0].AppointmentType}");
+            Console.WriteLine($"Lowest Cost: £{sorted[sorted.Count - 1].Price} - {sorted[sorted.Count - 1].AppointmentType}");
+            Console.WriteLine("======================================");
+        }
+
+
+
+
+
+        /// <summary>
+        /// CASE 4 ACTIVITY LOG VIEWER
+        /// This method processes the activity history stored in a fixed-size array.
+        /// It implements logic to handle empty states, providing professional feedback to the user.
+        /// </summary>
+        public void ShowActivityLog()
+        {
+            // --- 1. UI HEADER ---
+            // Prints a clear section header to separate the log from previous menu options.
+            Console.WriteLine("\n--- Activity Log ---");
+
+
+            // --- 2. BOOLEAN FLAG INITIALIZATION ---
+            // 'hasActivity' acts as a sentinel variable. It tracks whether the array 
+            // contains any valid strings. This is essential for handling the "Empty State".
+            bool hasActivity = false;
+
+            // --- 3. ARRAY TRAVERSAL (FOREACH LOOP) ---
+            // The loop iterates through each element 'a' within the 'activityLog' array.
+            foreach (string a in activityLog)
+            {
+                // --- 4. NULL/EMPTY STRING VALIDATION ---
+                // Checks if the current element 'a' contains actual text data.
+                // Array slots are often null or empty upon system startup.
+                if (!string.IsNullOrEmpty(a))
                 {
-                    low = a; // Updates the low variable if a cheaper price is found
+                    // If data is found, print it with a bullet point for better readability.
+                    Console.WriteLine("- " + a);
+
+                    // Set the flag to true to indicate the system found at least one record.
+                    hasActivity = true;
                 }
             }
 
-            // --- 4. OUTPUT DISPLAY ---
-            // Prints the final results based on the comparisons made in the loop.
-            Console.WriteLine("\n--- Price Statistics ---");
-            Console.WriteLine("Highest Cost Service: " + high.AppointmentType + " (£" + high.Price + ")");
-            Console.WriteLine("Lowest Cost Service: " + low.AppointmentType + " (£" + low.Price + ")");
+            // --- 5. CONDITIONAL FEEDBACK ---
+            // If the loop completes and 'hasActivity' remains false, it means the array 
+            // was entirely empty. The system then provides a fallback message.
+            if (!hasActivity)
+            {
+                Console.WriteLine("System Status: No activities recorded in the current session.");
+            }
         }
 
 
-
-
-
-
-/// <summary>
-/// CASE 5 ACTIVITY LOG VIEWER
-/// This method processes the activity history stored in a fixed-size array.
-/// It implements logic to handle empty states, providing professional feedback to the user.
-/// </summary>
-public void ShowActivityLog()
-{
-    // --- 1. UI HEADER ---
-    // Prints a clear section header to separate the log from previous menu options.
-    Console.WriteLine("\n--- Activity Log ---");
-
-
-    // --- 2. BOOLEAN FLAG INITIALIZATION ---
-    // 'hasActivity' acts as a sentinel variable. It tracks whether the array 
-    // contains any valid strings. This is essential for handling the "Empty State".
-    bool hasActivity = false;
-
-    // --- 3. ARRAY TRAVERSAL (FOREACH LOOP) ---
-    // The loop iterates through each element 'a' within the 'activityLog' array.
-    foreach (string a in activityLog)
-    {
-        // --- 4. NULL/EMPTY STRING VALIDATION ---
-        // Checks if the current element 'a' contains actual text data.
-        // Array slots are often null or empty upon system startup.
-        if (!string.IsNullOrEmpty(a))
+        /// <summary>
+        /// CASE 6: CLEAR BOOKING
+        /// Allows user to select which booking to delete from the list.
+        /// </summary>
+        public void ClearBooking()
         {
-            // If data is found, print it with a bullet point for better readability.
-            Console.WriteLine("- " + a);
-            
-            // Set the flag to true to indicate the system found at least one record.
-            hasActivity = true; 
+            // --- 1. COLLECTION STATE VALIDATION ---
+            if (allAppointments.Count == 0)
+            {
+                Console.WriteLine("No bookings to clear.");
+                return;
+            }
+
+            // --- 2. DYNAMIC MENU GENERATION ---
+            Console.WriteLine("\n--- Select Booking to Delete ---");
+            for (int i = 0; i < allAppointments.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {allAppointments[i].PatientName} - {allAppointments[i].AppointmentType} (£{allAppointments[i].Price})");
+            }
+            Console.Write("Enter number to delete (0 to cancel): ");
+
+            // --- 3. INPUT PARSING ---
+            string? input = Console.ReadLine();
+            if (string.IsNullOrEmpty(input) || !int.TryParse(input, out int choice))
+            {
+                Console.WriteLine("Invalid selection.");
+                return;
+            }
+
+            // --- 4. ESCAPE CLAUSE ---
+            if (choice == 0)
+            {
+                Console.WriteLine("Operation cancelled.");
+                return;
+            }
+
+            // --- 5. BOUNDARY CHECKING AND REMOVAL ---
+            if (choice < 1 || choice > allAppointments.Count)
+            {
+                Console.WriteLine("Invalid selection.");
+                return;
+            }
+
+            // Store reference before deletion
+            var removed = allAppointments[choice - 1];
+
+            // Remove the appointment
+            allAppointments.RemoveAt(choice - 1);
+
+            // --- 6. LOGGING ---
+            AddActivity($"Deleted booking: {removed.AppointmentType} for {removed.PatientName}");
+
+            // --- 7. FEEDBACK ---
+            Console.WriteLine($"Booking #{choice} has been deleted successfully.");
         }
     }
 
-    // --- 5. CONDITIONAL FEEDBACK ---
-    // If the loop completes and 'hasActivity' remains false, it means the array 
-    // was entirely empty. The system then provides a fallback message.
-    if (!hasActivity)
-    {
-        Console.WriteLine("System Status: No activities recorded in the current session.");
-    }
-}
-
-    
-    }
-    
 }
 
 
