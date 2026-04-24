@@ -12,3 +12,4 @@ C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\refint\RegentHealth
 C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\RegentHealthApp.pdb
 C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\RegentHealthApp.genruntimeconfig.cache
 C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\ref\RegentHealthApp.dll
+C:\Users\manga\Desktop\Regent\RegentHealth\obj\Debug\net10.0\RegentHealthApp.sourcelink.json
