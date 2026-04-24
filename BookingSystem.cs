@@ -4,10 +4,24 @@ using System.Collections.Generic;
 namespace RegentHealthBookingSystem
 {
     class BookingSystem
+
+    
     {
+        
         // Fields required for the method to function
         private Appointment? currentAppointment;
         private List<Appointment> allAppointments = new List<Appointment>();
+        private List<string> activityLog = new List<string>();
+        private Patient? currentPatient;
+        public void CreatePatient(string name)
+        {
+            // Ahora C# sabe qué es currentPatient
+            currentPatient = new Patient(name); 
+            AddActivity("Created patient: " + name);
+        }
+
+
+        
 
         /// <summary>
         /// Handles the process of booking a medical appointment.
@@ -15,6 +29,7 @@ namespace RegentHealthBookingSystem
         /// </summary>
         public void BookAppointment()
         {
+            
             // --- 1. DISPLAY SERVICE MENU ---
             // Presents the available options and their costs to the user.
             Console.WriteLine("1. General Consultation (£35)");
@@ -76,7 +91,7 @@ namespace RegentHealthBookingSystem
         }
 
         // Placeholder for the AddActivity method to avoid errors
-        public void AddActivity(string action) { /* Logic handled in the log method */ }
+        public void AddActivity(string action) { activityLog.Add(action); }
 
 
 
@@ -171,8 +186,58 @@ namespace RegentHealthBookingSystem
             Console.WriteLine("Highest Cost Service: " + high.AppointmentType + " (£" + high.Price + ")");
             Console.WriteLine("Lowest Cost Service: " + low.AppointmentType + " (£" + low.Price + ")");
         }
+
+
+
+
+
+
+/// <summary>
+/// CASE 5 ACTIVITY LOG VIEWER
+/// This method processes the activity history stored in a fixed-size array.
+/// It implements logic to handle empty states, providing professional feedback to the user.
+/// </summary>
+public void ShowActivityLog()
+{
+    // --- 1. UI HEADER ---
+    // Prints a clear section header to separate the log from previous menu options.
+    Console.WriteLine("\n--- Activity Log ---");
+
+
+    // --- 2. BOOLEAN FLAG INITIALIZATION ---
+    // 'hasActivity' acts as a sentinel variable. It tracks whether the array 
+    // contains any valid strings. This is essential for handling the "Empty State".
+    bool hasActivity = false;
+
+    // --- 3. ARRAY TRAVERSAL (FOREACH LOOP) ---
+    // The loop iterates through each element 'a' within the 'activityLog' array.
+    foreach (string a in activityLog)
+    {
+        // --- 4. NULL/EMPTY STRING VALIDATION ---
+        // Checks if the current element 'a' contains actual text data.
+        // Array slots are often null or empty upon system startup.
+        if (!string.IsNullOrEmpty(a))
+        {
+            // If data is found, print it with a bullet point for better readability.
+            Console.WriteLine("- " + a);
+            
+            // Set the flag to true to indicate the system found at least one record.
+            hasActivity = true; 
+        }
     }
 
+    // --- 5. CONDITIONAL FEEDBACK ---
+    // If the loop completes and 'hasActivity' remains false, it means the array 
+    // was entirely empty. The system then provides a fallback message.
+    if (!hasActivity)
+    {
+        Console.WriteLine("System Status: No activities recorded in the current session.");
+    }
+}
+
+    
+    }
+    
 }
 
 

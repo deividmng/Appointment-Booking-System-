@@ -29,5 +29,6 @@ namespace RegentHealthBookingSystem
             // Appending the required corporate domain = + "@regenthealth.com".
             email = name.Replace(" ", "").ToLower() + "@regenthealth.com";
         }
+        
     }
 }

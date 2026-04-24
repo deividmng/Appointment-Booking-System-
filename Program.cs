@@ -70,21 +70,23 @@ namespace RegentHealthBookingSystem
                 switch (Console.ReadLine())
                 {
                     case "1":
-                        // Input and validation for patient registration
+                        // 1. Pedimos el nombre al usuario
                         Console.Write("Enter full name: ");
                         string name = Console.ReadLine();
 
-                        // Verify the name is not empty and contains only valid characters
+                        // 2. Usamos tu validación (¡esto es muy bueno!)
                         if (string.IsNullOrWhiteSpace(name) || !IsValidName(name))
                         {
-                            Console.WriteLine("Invalid name.");
-                            break; // Exit the case if validation fails
+                            Console.WriteLine("Invalid name. Please use letters only.");
+                            break;
                         }
-                        // If valid, create the patient in the system
-                        // system.CreatePatient(name);
-                        Console.WriteLine("Patient created.");
-                        break;
 
+                        // 3. LA LLAMADA CLAVE: Enviamos el nombre al método del sistema
+                        // Esto conecta tu menú con la lógica que guarda al paciente.
+                        system.CreatePatient(name);
+
+                        Console.WriteLine("Patient created successfully.");
+                        break;
                     case "2":
                         // Placeholder for booking logic
                         system.BookAppointment();
@@ -102,7 +104,7 @@ namespace RegentHealthBookingSystem
 
                     case "5":
                         // Placeholder to display the last 3 user actions
-                        // system.ShowActivityLog();
+                        system.ShowActivityLog();
                         break;
 
                     case "6":
