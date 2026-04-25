@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions; // Required for Regex
 
 namespace RegentHealthBookingSystem
 {
@@ -43,19 +44,29 @@ namespace RegentHealthBookingSystem
         private List<string> activityLog = new List<string>();
         public void CreatePatient(string name)
         {
-            // Clean the name: remove spaces and convert to lowercase
+            // --- 1. DATA NORMALIZATION ---
+            // Remove spaces and convert to lowercase for consistency
             string cleanName = name.Replace(" ", "").ToLower();
 
-            // 1. Create the instance with cleaned name
+            // --- 2. SECURITY CHECK (LETTERS ONLY) ---
+            // If the name is empty or contains non-alphabetic characters (numbers, symbols),
+            // we stop the execution to prevent "Dirty Data" from entering the list.
+            if (string.IsNullOrWhiteSpace(cleanName) || !cleanName.All(char.IsLetter))
+            {
+                Console.WriteLine("[ERROR] Critical Error: Name must contain letters only.");
+                return; // Exit the function immediately
+            }
+
+            // --- 3. OBJECT INSTANTIATION ---
+            // Create the instance with the validated and cleaned name
             Patient newPatient = new Patient(cleanName);
 
-            // 2. Archive it in the global list (Database)
+            // --- 4. PERSISTENCE & SESSION STATE ---
+            // Archive it in the global list and set as the active patient
             allPatients.Add(newPatient);
-
-            // 3. Set as the active patient for immediate booking
             currentPatient = newPatient;
 
-            // 4. Record the history
+            // --- 5. LOGGING ---
             AddActivity("Registered and selected patient: " + cleanName);
         }
 
@@ -101,23 +112,45 @@ namespace RegentHealthBookingSystem
                     return;
             }
 
+
+
             // --- 3. INPUT VALIDATION (DATE) ---
-            // Ensures the date follows the correct format and is not in the past.
-            Console.Write("Enter date (yyyy-mm-dd): ");
+            // Ensures the date is in the correct format and not in the past.
             DateTime date;
-            if (!DateTime.TryParse(Console.ReadLine(), out date) || date < DateTime.Today)
+            while (true)
             {
-                Console.WriteLine("Invalid date. Please enter a valid future date.");
-                return;
+                Console.Write("Enter date (yyyy-mm-dd): ");
+                string? dateInput = Console.ReadLine();
+
+                if (DateTime.TryParse(dateInput, out date) && date >= DateTime.Today)
+                {
+                    break; // Valid future date provided
+                }
+                Console.WriteLine("Invalid date. Please use YYYY-MM-DD (e.g., 2026-05-20) and ensure it's not a past date.");
             }
 
-            // --- 4. DATA CAPTURE (TIME) ---
-            Console.Write("Enter time (HH:mm): ");
-            string? time = Console.ReadLine();
-            if (string.IsNullOrEmpty(time))
+            // --- 4. DATA CAPTURE (STRICT BUSINESS HOURS: 09:00 - 21:00) ---
+            // Ensures the time follows the HH:mm format and falls within operating hours.
+            string? time = "";
+            while (true)
             {
-                Console.WriteLine("Invalid time.");
-                return;
+                Console.Write("Enter time (HH:mm) [Opening hours: 09:00 - 21:00]: ");
+                time = Console.ReadLine() ?? "";
+
+                // Regex Pattern Logic:
+                // ^                 : Start of string
+                // (09|[1][0-9]|20)  : Matches 09, 10-19, or 20 as hours
+                // :[0-5][0-9]       : Matches any minute from :00 to :59
+                // |21:00            : Specifically allows the closing time of 21:00
+                // $                 : End of string
+                string openingHoursPattern = @"^((09|[1][0-9]|20):[0-5][0-9]|21:00)$";
+
+                if (Regex.IsMatch(time, openingHoursPattern))
+                {
+                    break; // Valid format and within business hours
+                }
+
+                Console.WriteLine("Invalid input! Please enter a time between 09:00 and 21:00 in HH:mm format.");
             }
 
             // --- 5. INSTANTIATION AND RECORDING ---
@@ -177,7 +210,6 @@ namespace RegentHealthBookingSystem
         //?----Case 3 ----
 
         /// <summary>
-        /// CASE 4: STATISTICS REPORT
         /// Displays all appointments sorted from highest to lowest cost.
         /// </summary>
         public void ShowHighestLowest()
@@ -201,7 +233,7 @@ namespace RegentHealthBookingSystem
 
             foreach (var a in sorted)
             {
-                Console.WriteLine($"£{a.Price} - {a.AppointmentType} ({a.PatientName})");
+                Console.WriteLine($"£{a.Price} - {a.AppointmentType} Name: ({a.PatientName})");
             }
 
             Console.WriteLine("----------------------------------------");
