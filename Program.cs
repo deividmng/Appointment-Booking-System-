@@ -22,12 +22,27 @@ namespace RegentHealthBookingSystem
             Console.Write("Password: ");
             // Geting  user input and store "assing" it in variable 'p'
             string p = Console.ReadLine();
+            
 
             // Conditional statement if  to validate credentials of the user 
             if (u == "d" && p == "r")
             {
-                // If both match, display success message
-                Console.WriteLine("Login successful.");
+                Console.ForegroundColor = ConsoleColor.Green;
+
+                // ASCII Art Doctor
+                Console.WriteLine(@"
+            [Doctor]
+            \O /
+            /|   
+            / \  
+    ");
+
+                Console.WriteLine("========================================");
+                Console.WriteLine($"  WELCOME, DR. {u.ToUpper()}");
+                Console.WriteLine("  System Access: GRANTED");
+                Console.WriteLine("========================================");
+
+                Console.ResetColor();
                 return true;
             }
             // If credentials do not match, display an error message
@@ -69,34 +84,36 @@ namespace RegentHealthBookingSystem
                 switch (Console.ReadLine())
                 {
                     case "1":
-                        // 1. Pedimos el nombre al usuario
-                        Console.Write("Enter full name: ");
-                        string inputName = Console.ReadLine() ?? "";
-
-                        // --- TRANSFORMACIÓN DE DATOS ---
-                        // 1. ToLower(): Convierte "JUAN" o "Juan" en "juan".
-                        // 2. Replace(" ", ""): Busca todos los espacios en blanco y los elimina por completo.
-                        // 3. Trim(): Elimina espacios accidentales al inicio o al final.
-                        string cleanedName = inputName.ToLower().Replace(" ", "").Trim();
-
-                        // Usamos la validación con el nombre ya transformado
-                        if (string.IsNullOrWhiteSpace(cleanedName) || !IsValidName(cleanedName))
+                        while (true)
                         {
-                            Console.WriteLine("Invalid name. Please use letters only.");
-                            break;
+                            Console.WriteLine("\n--- Registration ---");
+                            Console.Write("Enter name (Letters only): ");
+                            string input = Console.ReadLine() ?? "";
+
+                            // 1. REGEX: This pattern checks for Letters (a-z, A-Z) and spaces (\s)
+                            // ^[a-zA-Z\s]+$ means: start with letter/space, repeat, and end.
+                            bool isOnlyLetters = System.Text.RegularExpressions.Regex.IsMatch(input, @"^[a-zA-Z\s]+$");
+
+                            // 2. CHECK: If it's not empty AND matches the pattern
+                            if (!string.IsNullOrWhiteSpace(input) && isOnlyLetters)
+                            {
+                                system.CreatePatient(input);
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine(">> SUCCESS: Patient registered.");
+                                Console.ResetColor();
+                                break; 
+                            }
+                            else
+                            {
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine("[ERROR] Use letters only. No numbers or symbols allowed.");
+                                Console.ResetColor();
+                            }
                         }
 
-                        // Guardamos al paciente con el nombre limpio (ej: "juanperez")
-                        system.CreatePatient(cleanedName);
-                        Console.WriteLine($"Patient registered successfully as: {cleanedName}");
-
-                        // PASO 2: ENCADENAMIENTO
-                        Console.WriteLine("\n--- Proceeding to Appointment Booking ---");
+                        // This runs after the break
                         system.BookAppointment();
-
                         break;
-
-
 
                     case "2":
                         // Placeholder to display the current booking summary
@@ -121,13 +138,15 @@ namespace RegentHealthBookingSystem
 
                     case "6":
                         // Termination logic:" exit the loop" close close menu
-                        Console.WriteLine("Logged out.");
+
                         running = false;
                         break;
 
                     default:
                         // Error handling for any input that doesn't match options 1-7
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Invalid option. Please chose for any of the options");
+                        Console.ResetColor();
                         break;
                 }
             }
