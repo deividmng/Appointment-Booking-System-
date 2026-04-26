@@ -1,3 +1,5 @@
+using RegentHealthBookingSystem;
+
 public class Appointment
 {
     // --- 1. PRIVATE FIELDS (Backing Fields) ---
@@ -29,13 +31,6 @@ public class Appointment
         this.price = price;
         this.patientName = pName;   // Asignamos el nombre
         this.patientEmail = pEmail; // Asignamos el email
-        this.classification = Classify_appointment(price);
-    }
-
-    private string Classify_appointment(double price)
-    {
-        if (price < 20) return "Low Cost";
-        if (price <= 50) return "Standard";
-        return "Premium";
+        this.classification = ClassifyAppointment.ClassifyAppointmentPrice(price);
     }
 }
