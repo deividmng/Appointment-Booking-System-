@@ -37,11 +37,10 @@ namespace RegentHealthBookingSystem
         private List<Appointment> allAppointments = new List<Appointment>();
 
         /// <summary>
-        /// A dynamic string collection that records every significant system event.
-        /// It provides transparency and allows the user to see a chronological history 
-        /// of their actions (Audit Trail).
+        /// A fixed-size array that stores only the last 3 actions (Activity Log requirement).
         /// </summary>
-        private List<string> activityLog = new List<string>();
+        private string[] activityLog = new string[3];
+        private int activityCount = 0; // Track number of activities stored
         public void CreatePatient(string name)
         {
             // --- 1. DATA NORMALIZATION ---
@@ -155,7 +154,9 @@ namespace RegentHealthBookingSystem
 
             // --- 5. INSTANTIATION AND RECORDING ---
             // Creates a new Appointment object and adds it to the global list for reporting.
-            currentAppointment = new Appointment(type, date, time, price, currentPatient?.FullName, currentPatient?.Email);
+            string patientName = currentPatient?.FullName ?? "Unknown";
+            string patientEmail = currentPatient?.Email ?? "unknown@regenthealth.com";
+            currentAppointment = new Appointment(type, date, time, price, patientName, patientEmail);
             allAppointments.Add(currentAppointment);
 
             // Updates the activity log to track system usage.
@@ -163,7 +164,23 @@ namespace RegentHealthBookingSystem
         }
 
         // Placeholder for the AddActivity method to avoid errors
-        public void AddActivity(string action) { activityLog.Add(action); }
+        public void AddActivity(string action)
+        {
+            if (activityCount < 3)
+            {
+                activityLog[activityCount] = action;
+                activityCount++;
+            }
+            else
+            {
+                // Shift all elements left and add new one at the end
+                for (int i = 0; i < 2; i++)
+                {
+                    activityLog[i] = activityLog[i + 1];
+                }
+                activityLog[2] = action;
+            }
+        }
 
 
 
@@ -247,45 +264,25 @@ namespace RegentHealthBookingSystem
 
 
         /// <summary>
-        /// CASE 4 ACTIVITY LOG VIEWER
-        /// This method processes the activity history stored in a fixed-size array.
-        /// It implements logic to handle empty states, providing professional feedback to the user.
+        /// CASE 5: ACTIVITY LOG VIEWER
+        /// Displays the last 3 actions performed in the system.
         /// </summary>
         public void ShowActivityLog()
         {
-            // --- 1. UI HEADER ---
-            // Prints a clear section header to separate the log from previous menu options.
-            Console.WriteLine("\n--- Activity Log ---");
+            Console.WriteLine("\n--- Activity Log (Last 3 Actions) ---");
 
-
-            // --- 2. BOOLEAN FLAG INITIALIZATION ---
-            // 'hasActivity' acts as a sentinel variable. It tracks whether the array 
-            // contains any valid strings. This is essential for handling the "Empty State".
-            bool hasActivity = false;
-
-            // --- 3. ARRAY TRAVERSAL (FOREACH LOOP) ---
-            // The loop iterates through each element 'a' within the 'activityLog' array.
-            foreach (string a in activityLog)
+            if (activityCount == 0)
             {
-                // --- 4. NULL/EMPTY STRING VALIDATION ---
-                // Checks if the current element 'a' contains actual text data.
-                // Array slots are often null or empty upon system startup.
-                if (!string.IsNullOrEmpty(a))
-                {
-                    // If data is found, print it with a bullet point for better readability.
-                    Console.WriteLine("- " + a);
-
-                    // Set the flag to true to indicate the system found at least one record.
-                    hasActivity = true;
-                }
+                Console.WriteLine("No activities recorded yet.");
+                return;
             }
 
-            // --- 5. CONDITIONAL FEEDBACK ---
-            // If the loop completes and 'hasActivity' remains false, it means the array 
-            // was entirely empty. The system then provides a fallback message.
-            if (!hasActivity)
+            for (int i = 0; i < activityCount; i++)
             {
-                Console.WriteLine("System Status: No activities recorded in the current session.");
+                if (!string.IsNullOrEmpty(activityLog[i]))
+                {
+                    Console.WriteLine($"- {activityLog[i]}");
+                }
             }
         }
 
@@ -352,5 +349,7 @@ namespace RegentHealthBookingSystem
 
 /// 
 ///
+
+
 
 

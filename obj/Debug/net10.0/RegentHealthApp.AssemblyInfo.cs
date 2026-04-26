@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RegentHealthApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+78ba1481345232912e0182725cb78b55ba06b20b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9aaead0daa860bcd60b8c083c4253ef7f08554ad")]
 [assembly: System.Reflection.AssemblyProductAttribute("RegentHealthApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RegentHealthApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
