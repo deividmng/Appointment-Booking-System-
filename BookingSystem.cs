@@ -44,28 +44,31 @@ namespace RegentHealthBookingSystem
         public void CreatePatient(string name)
         {
             // --- 1. DATA NORMALIZATION ---
-            // Remove spaces and convert to lowercase for consistency
+            // Remove spaces and convert to lowercase for consistency usind.Replace method to delete the spaces and .ToLower to conver to lowerCasa
             string cleanName = name.Replace(" ", "").ToLower();
 
             // --- 2. SECURITY CHECK (LETTERS ONLY) ---
             // If the name is empty or contains non-alphabetic characters (numbers, symbols),
-            // we stop the execution to prevent "Dirty Data" from entering the list.
+            // we stop the execution to prevent "Dirty Data" from entering the list. using IsNullOrWhite prevent to create a pacient without a name, .All(char.IsLetter) ensure that the var is only alfabethic chars <used this mrthods for segurity
             if (string.IsNullOrWhiteSpace(cleanName) || !cleanName.All(char.IsLetter))
             {
+// In cases one of then using the logical OR operator ||   ! will makes sure if at least one condition is met
                 Console.WriteLine("[ERROR] Critical Error: Name must contain letters only.");
                 return; // Exit the function immediately
             }
 
             // --- 3. OBJECT INSTANTIATION ---
-            // Create the instance with the validated and cleaned name
+            // Create the instance with the validated and cleaned name as a cleanName as a parramt, cleand of.spaces and number or error
+
             Patient newPatient = new Patient(cleanName);
 
             // --- 4. PERSISTENCE & SESSION STATE ---
-            // Archive it in the global list and set as the active patient
+            // Archive it in the global list and set as the active patient appening adding the newPatient to the allPatients "list" 
             allPatients.Add(newPatient);
             currentPatient = newPatient;
 
             // --- 5. LOGGING ---
+// Calling the metohd AddActivy, that is in charge to to save the activit to be available to display after 
             AddActivity("Registered and selected patient: " + cleanName);
         }
 
