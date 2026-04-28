@@ -10,7 +10,8 @@ namespace RegentHealthBookingSystem
         private string email;
 
         // --- Properties ---
-        // These allow other classes to read the data without and not be avalible to modify it directly.
+        // These allow other classes to read the data without and not be avalible to modify it directly suing
+        //  just get .
         public string FullName { get { return fullName; } }
         public string Email { get { return email; } }
 
