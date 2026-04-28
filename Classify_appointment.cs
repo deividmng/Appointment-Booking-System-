@@ -3,10 +3,13 @@ using System;
 namespace RegentHealthBookingSystem
 {
     /// <summary>
-    /// Part 2 - Appointment Utility Function (No OOP)
+    /// Appointment Utility Function (No OOP) The purpose of this class is for Utility Method based the cost "price" pased as a parramt when the objet is crated maintaining data without out manual intervetion 
     /// This is a static method without using any classes or objects.
     /// </summary>
-    public static class ClassifyAppointment
+    public static class on this way the appointment constratur can acces to it 
+
+
+ClassifyAppointment
     {
         /// <summary>
         /// Classifies appointment price into categories.
